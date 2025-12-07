@@ -33,15 +33,54 @@ export class MultiFileRefactor {
     ];
 
     const response = await provider.chat(messages);
-    // TODO: Parse structured response to extract individual file changes
-    // For now, return a simple structure
-    return {
-      files: files.map((f) => ({
+    
+    // Try to parse structured response
+    // Look for file blocks in the format: FILE: path/to/file.ts
+    const fileBlocks = response.content.split(/FILE:\s*([^\n]+)/);
+    const result: MultiFileRefactorResult = { files: [] };
+
+    if (fileBlocks.length > 1) {
+      // Structured response with file markers
+      for (let i = 1; i < fileBlocks.length; i += 2) {
+        const filePath = fileBlocks[i].trim();
+        const content = fileBlocks[i + 1]?.trim() || "";
+        
+        // Extract code from markdown if present
+        let code = content;
+        const codeBlockMatch = content.match(/```[\w]*\n([\s\S]*?)\n```/);
+        if (codeBlockMatch) {
+          code = codeBlockMatch[1];
+        }
+
+        // Find matching file
+        const matchingFile = files.find((f) => 
+          f.relativePath.includes(filePath) || filePath.includes(f.relativePath)
+        );
+
+        if (matchingFile) {
+          result.files.push({
+            path: matchingFile.path,
+            content: code,
+            reason: instructions,
+          });
+        }
+      }
+    } else {
+      // Fallback: single response, apply to all files
+      let code = response.content;
+      const codeBlockMatch = code.match(/```[\w]*\n([\s\S]*?)\n```/);
+      if (codeBlockMatch) {
+        code = codeBlockMatch[1];
+      }
+
+      result.files = files.map((f) => ({
         path: f.path,
-        content: response.content,
+        content: code,
         reason: instructions,
-      })),
-    };
+      }));
+    }
+
+    return result;
   }
 }
 

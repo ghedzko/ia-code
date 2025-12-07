@@ -8,10 +8,16 @@ CLI completo similar a Codex/Claude/Gemini que permite generar código, leer pro
 - **Chat interactivo**: Conversación continua con streaming de respuestas
 - **Generación de código**: Crear código nuevo desde instrucciones en lenguaje natural
 - **Explicación de código**: Entender código existente con explicaciones detalladas
-- **Refactorización**: Modificar y mejorar código existente
-- **Análisis de proyectos**: Lectura y análisis de estructura de proyectos
+- **Refactorización**: Modificar y mejorar código existente (single y multi-archivo)
+- **Análisis arquitectónico**: Análisis profundo de estructura, capas, dependencias y flujos
+- **Generación de tests**: Crear, mejorar y mantener tests inteligentemente
+- **Auto-fix**: Corrección automática de errores con validación y re-evaluación
+- **Debugging**: Razonamiento paso a paso sobre stacktraces y logs
+- **Documentación**: Generación avanzada de documentación técnica
+- **Product thinking**: Discusión de requisitos, diseño y arquitectura
 - **Integración Git**: Detección de cambios y estado del repositorio
 - **Ejecución segura**: Sistema de políticas para ejecutar comandos del sistema
+- **Memoria persistente**: Almacenamiento de estilo, convenciones y preferencias del proyecto
 - **Configuración flexible**: Variables de entorno y archivo de configuración TOML
 
 ## Instalación
@@ -102,6 +108,46 @@ bun run src/cli/index.ts explain src/utils/logger.ts
 
 ```bash
 bun run src/cli/index.ts refactor src/utils/logger.ts "mejorar la legibilidad y agregar tipos"
+```
+
+### Generar/Mejorar Tests
+
+```bash
+# Generar tests para un archivo
+bun run src/cli/index.ts test src/utils/logger.ts -o src/utils/logger.test.ts
+
+# Mejorar tests existentes
+bun run src/cli/index.ts test src/utils/logger.test.ts --improve
+```
+
+### Análisis Arquitectónico
+
+```bash
+bun run src/cli/index.ts analyze .
+```
+
+### Auto-fix de Errores
+
+```bash
+bun run src/cli/index.ts autofix src/utils/logger.ts -e "TypeError: Cannot read property"
+```
+
+### Debugging
+
+```bash
+bun run src/cli/index.ts debug "Error: Cannot read property 'x' of undefined" -f src/utils/logger.ts
+```
+
+### Generar Documentación
+
+```bash
+bun run src/cli/index.ts docs . -o README.md
+```
+
+### Discusión de Diseño
+
+```bash
+bun run src/cli/index.ts design "¿Cómo deberíamos estructurar el sistema de autenticación?" -f src/auth.ts
 ```
 
 ### Ejecutar Comandos

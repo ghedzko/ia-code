@@ -1,5 +1,6 @@
 import { BaseProvider, type Message, type ProviderConfig, type ProviderResponse } from "./base.js";
 import type { StreamHandler } from "../utils/streaming.js";
+import { formatAPIError } from "./error-utils.js";
 
 export class DeepSeekProvider extends BaseProvider {
   private baseURL = "https://api.deepseek.com/v1";
@@ -39,8 +40,8 @@ export class DeepSeekProvider extends BaseProvider {
     });
 
     if (!response.ok) {
-      const error = await response.text();
-      throw new Error(`DeepSeek API error: ${response.status} - ${error}`);
+      const errorText = await response.text();
+      throw new Error(formatAPIError("DeepSeek", response.status, errorText));
     }
 
     const data = await response.json();
@@ -76,8 +77,8 @@ export class DeepSeekProvider extends BaseProvider {
     });
 
     if (!response.ok) {
-      const error = await response.text();
-      throw new Error(`DeepSeek API error: ${response.status} - ${error}`);
+      const errorText = await response.text();
+      throw new Error(formatAPIError("DeepSeek", response.status, errorText));
     }
 
     if (!response.body) {

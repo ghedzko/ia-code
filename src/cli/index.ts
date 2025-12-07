@@ -6,6 +6,12 @@ import { generateCommand } from "./commands/generate.js";
 import { explainCommand } from "./commands/explain.js";
 import { refactorCommand } from "./commands/refactor.js";
 import { execCommand, CommandExecutor } from "./commands/exec.js";
+import { testCommand } from "./commands/test.js";
+import { analyzeCommand } from "./commands/analyze.js";
+import { autofixCommand } from "./commands/autofix.js";
+import { debugCommand } from "./commands/debug.js";
+import { docsCommand } from "./commands/docs.js";
+import { designCommand } from "./commands/design.js";
 import { ConfigLoader } from "../config/loader.js";
 import { DeepSeekProvider } from "../providers/deepseek.js";
 import { GrokProvider } from "../providers/grok.js";
@@ -118,6 +124,106 @@ async function main() {
       }
     });
 
+  // Test command
+  program
+    .command("test")
+    .description("Generate or improve tests")
+    .argument("[file]", "File path to generate tests for")
+    .option("-i, --improve", "Improve existing tests")
+    .option("-o, --output <file>", "Output file path")
+    .action(async (file: string | undefined, options: { improve?: boolean; output?: string }) => {
+      try {
+        const provider = createProvider(configLoader);
+        await testCommand(provider, file, options);
+      } catch (error) {
+        p.log.error(chalk.red(`Error: ${error instanceof Error ? error.message : String(error)}`));
+        process.exit(1);
+      }
+    });
+
+  // Analyze command
+  program
+    .command("analyze")
+    .description("Analyze project architecture")
+    .argument("[path]", "Project path to analyze", ".")
+    .action(async (path: string) => {
+      try {
+        const provider = createProvider(configLoader);
+        await analyzeCommand(provider, path);
+      } catch (error) {
+        p.log.error(chalk.red(`Error: ${error instanceof Error ? error.message : String(error)}`));
+        process.exit(1);
+      }
+    });
+
+  // Autofix command
+  program
+    .command("autofix")
+    .description("Automatically fix code errors")
+    .argument("<file>", "File path to fix")
+    .option("-e, --error <error>", "Error message or description")
+    .action(async (file: string, options: { error?: string }) => {
+      try {
+        const provider = createProvider(configLoader);
+        await autofixCommand(provider, file, options.error);
+      } catch (error) {
+        p.log.error(chalk.red(`Error: ${error instanceof Error ? error.message : String(error)}`));
+        process.exit(1);
+      }
+    });
+
+  // Debug command
+  program
+    .command("debug")
+    .description("Debug errors with step-by-step reasoning")
+    .argument("<stacktrace>", "Stacktrace or error message")
+    .option("-l, --logs <logs>", "Additional logs")
+    .option("-f, --file <file>", "Source file for context")
+    .action(async (stacktrace: string, options: { logs?: string; file?: string }) => {
+      try {
+        const provider = createProvider(configLoader);
+        await debugCommand(provider, stacktrace, options);
+      } catch (error) {
+        p.log.error(chalk.red(`Error: ${error instanceof Error ? error.message : String(error)}`));
+        process.exit(1);
+      }
+    });
+
+  // Docs command
+  program
+    .command("docs")
+    .description("Generate documentation")
+    .argument("[path]", "Project path", ".")
+    .option("-o, --output <file>", "Output file path", "README.md")
+    .option("-t, --type <type>", "Documentation type (readme|api|adr)", "readme")
+    .action(async (path: string, options: { output?: string; type?: string }) => {
+      try {
+        const provider = createProvider(configLoader);
+        const type = options.type as "readme" | "api" | "adr" | undefined;
+        await docsCommand(provider, path, { ...options, type });
+      } catch (error) {
+        p.log.error(chalk.red(`Error: ${error instanceof Error ? error.message : String(error)}`));
+        process.exit(1);
+      }
+    });
+
+  // Design command
+  program
+    .command("design")
+    .description("Discuss design and architecture")
+    .argument("[question]", "Design question")
+    .option("-c, --context <context>", "Additional context")
+    .option("-f, --file <file>", "File to use as context")
+    .action(async (question: string | undefined, options: { context?: string; file?: string }) => {
+      try {
+        const provider = createProvider(configLoader);
+        await designCommand(provider, question, options);
+      } catch (error) {
+        p.log.error(chalk.red(`Error: ${error instanceof Error ? error.message : String(error)}`));
+        process.exit(1);
+      }
+    });
+
   // Init command
   program
     .command("init")
@@ -136,4 +242,3 @@ main().catch((error) => {
   logger.error("Fatal error:", error);
   process.exit(1);
 });
-

@@ -4,6 +4,7 @@ import { BaseProvider } from "../../providers/base.js";
 import type { Message } from "../../providers/base.js";
 import { logger } from "../../utils/logger.js";
 import { StreamWriter } from "../../utils/streaming.js";
+import { handleAPIError } from "../../utils/error-handler.js";
 
 export async function chatCommand(provider: BaseProvider) {
   p.intro(chalk.blue("IA Code Chat"));
@@ -51,8 +52,12 @@ export async function chatCommand(provider: BaseProvider) {
       const response = await provider.chat(messages);
       messages.push({ role: "assistant", content: response.content });
     } catch (error) {
-      p.log.error(chalk.red(`Error: ${error instanceof Error ? error.message : String(error)}`));
-      logger.error("Chat error:", error);
+      // Handle error with friendly message
+      handleAPIError(error, "Chat");
+      // Log to debug only (without stack trace)
+      logger.debug("Chat error:", error instanceof Error ? error.message : String(error));
+      // Don't exit, allow user to continue or try again
+      p.log.info(chalk.gray("You can continue the conversation or type 'exit' to quit."));
     }
   }
 
